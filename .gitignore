@@ -1,0 +1,5 @@
+# Ignore all files in leetcode/cpp
+leetcode/cpp/*
+
+# Do not ignore .cpp files in leetcode/cpp
+!leetcode/cpp/*.cpp
