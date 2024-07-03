@@ -24,4 +24,4 @@ git commit -m "$COMMIT_MSG"
 echo "Pushing the changes to the remote repository..."
 git push
 
-echo -e "\e[32mCode pushed successfully!\e[0m"
+echo -e "CODE PUSHED [SUCCESS]"
