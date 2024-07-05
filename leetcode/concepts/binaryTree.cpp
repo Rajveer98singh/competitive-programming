@@ -1,76 +1,178 @@
 #include <iostream>
 #include <vector>
+#include <queue>
 
 using namespace std;
 
-class BinarySearch
+struct TreeNode
 {
-public:
-    int binarySearch(vector<int> v, int target) // Implementation of Iterative  Binary Search Algorithm:
-    {
-        int l = 0;
-        int h = v.size() - 1;
-        while (l <= h)
-        {
-            int mid = l + (h - l) / 2;
-            if (v[mid] == target)
-                return mid;
-            if (v[mid] > target)
-            {
-                h = mid - 1;
-            }
-            else
-            {
-                l = mid + 1;
-            }
-        }
+    int data;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int data) : data(data), left(nullptr), right(nullptr) {}
+};
 
-        return -1;
-    }
+struct TreeInfo
+{
+    int height;
+    int diameter;
+    TreeInfo(int height, int diameter) : height(height), diameter(diameter){}
+};
 
-    int binarySearchRecursive(vector<int> v, int target)
-    {
-        int l = 0;
-        int h = v.size() - 1;
-        return helperBinarySearchRecursive(v, target, l, h);
-    }
 
+class BinaryTree
+{
 private:
-    int helperBinarySearchRecursive(vector<int> v, int target, int low, int high)
+    int index = -1;
+
+public:
+    TreeNode *buildTree(vector<int> nodes){
+        index++;
+        if (nodes[index] == -1)
+            return nullptr;
+        TreeNode *newNode = new TreeNode(nodes[index]);
+        newNode->left = buildTree(nodes);
+        newNode->right = buildTree(nodes);
+        return newNode;
+    }
+
+    void preOrderTraversal(TreeNode *root)
+    { // TimeComplexity is O(n) time
+        // Traversal order is : root => left SubTree => right SubTree
+        if (root == nullptr)
+            return;
+        cout << root->data << " ";
+        preOrderTraversal(root->left);
+        preOrderTraversal(root->right);
+    }
+
+    void inOrderTraversal(TreeNode *root)
+    { // TimeComplexity is O(n) time
+        // Traversal order is : Left Sub Tree => Root => Right Sub Tree
+        if (root == nullptr)
+            return;
+        inOrderTraversal(root->left);
+        cout << root->data << " ";
+        inOrderTraversal(root->right);
+    }
+
+    void postOrderTraversal(TreeNode *root)
+    { // TimeComplexity is O(n) time
+        // Traversal order is : Left Sub Tree => Right Sub Tree => root
+        if (root == nullptr)
+            return;
+        postOrderTraversal(root->left);
+        postOrderTraversal(root->right);
+        cout << root->data << " ";
+    }
+
+    void levelOrderTraversal(TreeNode *root)
     {
-        if (high >= low)
-        {
-            int mid = low + (high - low) / 2;
-            if (v[mid] == target)
-                return mid;
-            if (v[mid] > target)
-            {
-                return helperBinarySearchRecursive(v, target, low, mid - 1);
+        // we have to iterate over tree level wise
+        // we need the Queue for that purpose (use BFS technique) and we store NULL in queue to track nextLine
+        if(root == nullptr) return;
+        queue<TreeNode *> queue;
+        queue.push(root);
+        queue.push(nullptr);
+        while (!queue.empty()){
+            TreeNode* node = queue.front();
+            queue.pop();
+            if(node == nullptr){
+                cout<<endl;
+                if(queue.empty()){
+                    break;
+                }else{
+                    queue.push(nullptr);
+                }
+            }else{
+                cout<< node->data << " ";
+                if(node->left != nullptr){
+                    queue.push(node->left);
+                }
+                if(node->right != nullptr){
+                    queue.push(node->right);
+                }
             }
-            else
-            {
-                return helperBinarySearchRecursive(v, target, mid + 1, high);
-            }
+
         }
-        return -1;
+    }
+
+    int totalNodeCount(TreeNode* root){
+        if(root == nullptr) return 0;
+        int left = totalNodeCount(root->left);
+        int right = totalNodeCount(root->right);
+        return left + right +1;
+    }
+
+    int sumOfNodes(TreeNode* root){
+        if(root == nullptr) return 0;
+        int leftSum = sumOfNodes(root->left);
+        int rightSum = sumOfNodes(root->right);
+        return leftSum + rightSum + root->data;
+    }
+
+    int heightOfTree(TreeNode* root){
+        if(root == nullptr) return 0;
+        int leftHeight = heightOfTree(root->left);
+        int rightHeight = heightOfTree(root->right);
+        return max(leftHeight,rightHeight) +1;
+    }
+
+    int diameterOfTreeON2(TreeNode* root){
+        // O(n2) method
+        if(root == nullptr) return 0;
+        int diameter1 = diameterOfTreeON2(root->left);
+        int diameter2 = diameterOfTreeON2(root->right);
+        int diameter3 = heightOfTree(root->left)+heightOfTree(root->right)+1;
+        return max(diameter3,max(diameter1,diameter2));
+    }
+
+    TreeInfo* diameterOfTreeON(TreeNode* root){
+        if(root == nullptr){
+            return new TreeInfo(0,0);
+        }
+
+        TreeInfo* left = diameterOfTreeON(root->left);
+        TreeInfo* right = diameterOfTreeON(root->right);
+
+        int diameter1 = left->diameter;
+        int diameter2 = right->diameter;
+        int diameter3 = left->height + right->height + 1;
+        int diameter = max(max(diameter1,diameter2),diameter3);
+
+        int height = max(left->height,right->height) + 1;
+
+        TreeInfo* treeInfo = new TreeInfo(height,diameter);
+        return treeInfo;
     }
 };
 
 int main()
 {
-    vector<int> v = {1, 2, 3, 4, 5, 6};
-    int target = 6;
+    BinaryTree binaryTree;
+    vector<int> nodes = {1, 2, 4, -1, -1, 5, -1, -1, 3, -1, 6, -1, -1};
+    TreeNode *tree = binaryTree.buildTree(nodes);
 
-    BinarySearch binarySearch;
-    cout << "binarySearch: " << binarySearch.binarySearch(v, target) << endl;
-    cout << "binarySearchRecursive: " << binarySearch.binarySearchRecursive(v, target) << endl;
+    cout << "Pre Order Traversal : ";
+    binaryTree.preOrderTraversal(tree);
+    cout << " " << endl;
+    cout << "In Order Traversal : ";
+    binaryTree.inOrderTraversal(tree);
+    cout << " " << endl;
+    cout << "Post Order Traversal : ";
+    binaryTree.postOrderTraversal(tree);
+    cout << " " << endl;
+
+    cout << "Level Order Traversal : "<<endl;
+    binaryTree.levelOrderTraversal(tree);
+    cout << " " << endl;
+
+    cout<<"Total Number of nodes : "<< binaryTree.totalNodeCount(tree)<<endl;
+    cout<<"Sum of all nodes : "<< binaryTree.sumOfNodes(tree)<<endl;
+    cout<<"Height of Tree : "<< binaryTree.heightOfTree(tree)<<endl;
+    cout<<"Diameter of Tree O(N2) : "<< binaryTree.diameterOfTreeON2(tree)<<endl;
+    cout<<"Diameter of Tree O(N) : "<< binaryTree.diameterOfTreeON(tree)->diameter<<endl;
+    // Write your main logic here
 
     return 0;
 }
-
-
-// Time Complexity: 
-// Best Case: O(1)
-// Average Case: O(log N)
-// Worst Case: O(log N)
-// Auxiliary Space: O(1), If the recursive call stack is considered then the auxiliary space will be O(logN).
